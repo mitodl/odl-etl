@@ -40,6 +40,8 @@ logger = Logger(__name__)
 # Set some needed variables
 mysql_creds_user = settings['MySQL']['user']
 mysql_creds_pass = settings['MySQL']['pass']
+mysql_host = settings['MySQL']['host']
+mysql_db = settings['MySQL']['db']
 course_ids = []
 daily_folder = settings['Paths']['csv_folder'] + date_suffix + '/'
 
@@ -102,8 +104,8 @@ def get_list_of_staff():
 
 
 def mysql_query(course_ids):
-    engine = create_engine('mysql+mysqlconnector://{}:{}@localhost/edxapp_devstack'
-                           .format(mysql_creds_user, mysql_creds_pass))
+    engine = create_engine('mysql+mysqlconnector://{}:{}@{}/{}'
+                           .format(mysql_creds_user, mysql_creds_pass, mysql_host, mysql_db))
     connection = engine.connect()
     for course_id in course_ids:
         for key, value in query_dict.items():
