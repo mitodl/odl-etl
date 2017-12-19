@@ -21,7 +21,7 @@ except ImportError as err:
     sys.exit("Make sure to install logbook, requests and sqlalchemy")
 
 datetime = datetime.now()
-date_suffix = datetime.strftime('%m%d%Y')
+date_suffix = datetime.strftime('%Y-%m-%d')
 
 # Read settings_file
 try:
@@ -35,7 +35,6 @@ logger = RotatingFileHandler(settings['Logs']['logfile'],
                              backup_count=int(settings['Logs']['backup_count']),
                              level=int(settings['Logs']['level']))
 logger.push_application()
-logger = Logger(__name__)
 
 # Set some needed variables
 mysql_creds_user = settings['MySQL']['user']
@@ -137,14 +136,14 @@ def sync_to_s3(daily_folder, s3_bucket_name):
                                     stderr=subprocess.PIPE)
     except SyntaxError as err:
         logger.exception("Failed to run sync command. Check if awscli is installed")
-        notify_slack_channel(f"Failed to run sync command: `{err}`")
+        notify_slack_channel("Failed to run sync command: `{}`".format(err))
         sys.exit("[-] Failed to run sync command. Check if awscli is installed")
     except subprocess.SubprocessError as err:
         logger.exception("Failed to sync local files to s3 bucket")
-        notify_slack_channel(f"Sync failed: `{err}`")
+        notify_slack_channel("Sync failed: `{}`".format(err))
         sys.exit("[-] Failed to sync daily_folder to s3 bucket")
     logger.info("S3 sync successfully ran: {}", cmd_output)
-    notify_slack_channel(f"Sync succeeded: `str({cmd_output}`)")
+    notify_slack_channel("Sync succeeded: `str({}`)".format(cmd_output))
     logger.info("Syncing complete")
 
 

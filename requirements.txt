@@ -1,5 +1,0 @@
-awscli
-logbook
-mysql-connector-python
-requests
-sqlalchemy
