@@ -25,7 +25,7 @@ date_suffix = datetime.strftime('%Y-%m-%d')
 
 # Read settings_file
 try:
-    settings = json.load(open('settings.json'))
+    settings = json.load(open('/mitx/settings.json'))
 except IOError:
     sys.exit("[-] Failed to read settings file")
 
@@ -35,6 +35,7 @@ logger = RotatingFileHandler(settings['Logs']['logfile'],
                              backup_count=int(settings['Logs']['backup_count']),
                              level=int(settings['Logs']['level']))
 logger.push_application()
+logger = Logger('mitx_etl')
 
 # Set some needed variables
 mysql_creds_user = settings['MySQL']['user']
