@@ -95,7 +95,8 @@ def export_course(course_ids):
         with subprocess.Popen(['/edx/bin/python.edxapp',
                                '/edx/app/edxapp/edx-platform/manage.py',
                                'lms', '--settings', 'aws',
-                               'export_course', course_id, course_id + b'.tar.gz'], stdout=subprocess.PIPE) as proc:
+                               'export_course', course_id,
+                               daily_folder + course_id + b'.tar.gz'], stdout=subprocess.PIPE) as proc:
             logger.info(proc.stdout.read())
 
 
