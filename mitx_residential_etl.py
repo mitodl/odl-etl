@@ -116,7 +116,7 @@ def mysql_query(course_ids):
 
 
 def write_csv(query, key):
-    with open(daily_folder + str(key) + '.csv', 'a+') as f:
+    with open(daily_folder + str(key) + '.csv', 'a+', encoding="utf-8") as f:
         writer = csv.writer(f)
         for row in query:
             writer.writerow(row)
