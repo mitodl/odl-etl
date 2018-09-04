@@ -43,7 +43,7 @@ mysql_creds_pass = settings['MySQL']['pass']
 mysql_host = settings['MySQL']['host']
 mysql_db = settings['MySQL']['db']
 course_ids = []
-exported_courses_folder = settings.['Paths']['courses'] + date_suffix + '/'
+exported_courses_folder = settings['Paths']['courses'] + date_suffix + '/'
 daily_folder = settings['Paths']['csv_folder'] + date_suffix + '/'
 
 # List of db queries
