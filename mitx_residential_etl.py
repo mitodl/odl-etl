@@ -42,6 +42,7 @@ mysql_creds_user = settings['MySQL']['user']
 mysql_creds_pass = settings['MySQL']['pass']
 mysql_host = settings['MySQL']['host']
 mysql_db = settings['MySQL']['db']
+course_ids = []
 exported_courses_folder = settings.['Paths']['courses'] + date_suffix + '/'
 daily_folder = settings['Paths']['csv_folder'] + date_suffix + '/'
 
@@ -61,7 +62,7 @@ def set_environment_variables():
     os.environ['AWS_SECRET_ACCESS_KEY'] = settings['AWS']['AWS_SECRET_ACCESS_KEY']
 
 
-def verify_and_create_daily_csv_folder(csv_folder):
+def verify_and_create_required_folders(csv_folder, courses):
     """
     Check whether the folder that will contain csv query files exists
 
@@ -74,6 +75,10 @@ def verify_and_create_daily_csv_folder(csv_folder):
     if not os.path.exists(daily_folder):
         os.makedirs(settings['Paths']['csv_folder'] + date_suffix + '/')
         logger.info("csv folder(s) created")
+
+    if not os.path.exists(exported_courses_folder):
+        os.makedirs(settings['Paths']['courses'] + date_suffix + '/')
+        logger.info("exported_courses_folder created")
 
 
 def export_all_courses(exported_courses_folder):
@@ -110,6 +115,20 @@ def tar_exported_courses(exported_courses_folder):
 
 def get_list_of_staff():
     pass
+
+
+def get_course_ids():
+     """
+     Get a list of course ids that is necessary for the rest of the
+     functions to work.
+     """
+     global course_ids
+     dump_course_ids = subprocess.Popen(['/edx/bin/python.edxapp',
+                                         '/edx/app/edxapp/edx-platform/manage.py',
+                                         'lms', '--settings', 'aws',
+                                         'dump_course_ids'], stdout=subprocess.PIPE)
+     course_ids = dump_course_ids.communicate()[0].split()
+     return course_ids
 
 
 def mysql_query(course_ids):
@@ -177,9 +196,11 @@ def notify_slack_channel(slack_message):
 
 def main():
     set_environment_variables()
-    verify_and_create_daily_csv_folder(settings['Paths']['csv_folder'])
+    verify_and_create_daily_csv_folder(settings['Paths']['csv_folder'],
+                                       settings['Paths']['courses'])
+    export_all_courses(exported_courses_folder)
+    tar_exported_courses(exported_courses_folder)
     get_course_ids()
-    export_course(course_ids)
     mysql_query(course_ids)
     sync_to_s3(daily_folder, settings['S3Bucket']['bucket'])
 
