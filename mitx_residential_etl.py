@@ -42,7 +42,7 @@ mysql_creds_user = settings['MySQL']['user']
 mysql_creds_pass = settings['MySQL']['pass']
 mysql_host = settings['MySQL']['host']
 mysql_db = settings['MySQL']['db']
-course_ids = []
+exported_courses_folder = settings.['Paths']['courses'] + date_suffix + '/'
 daily_folder = settings['Paths']['csv_folder'] + date_suffix + '/'
 
 # List of db queries
@@ -76,28 +76,36 @@ def verify_and_create_daily_csv_folder(csv_folder):
         logger.info("csv folder(s) created")
 
 
-def get_course_ids():
+def export_all_courses(exported_courses_folder):
     """
-    Get a list of course ids that is necessary for the rest of the
-    functions to work.
+    Export all courses into specified folder
+
+    Args:
+      exported_courses_folder (str): The path of folder to export courses to.
+
     """
-    global course_ids
-    dump_course_ids = subprocess.Popen(['/edx/bin/python.edxapp',
-                                        '/edx/app/edxapp/edx-platform/manage.py',
-                                        'lms', '--settings', 'aws',
-                                        'dump_course_ids'], stdout=subprocess.PIPE)
-    course_ids = dump_course_ids.communicate()[0].split()
-    return course_ids
-
-
-def export_course(course_ids):
-    for course_id in course_ids:
-        with subprocess.Popen(['/edx/bin/python.edxapp',
+    try:
+        subprocess.Popen(['/edx/bin/python.edxapp',
                                '/edx/app/edxapp/edx-platform/manage.py',
-                               'lms', '--settings', 'aws',
-                               'export_course', course_id,
-                               bytes(daily_folder, 'utf-8') + course_id + b'.tar.gz'], stdout=subprocess.PIPE) as proc:
-            logger.info(proc.stdout.read())
+                               'cms', '--settings', 'aws',
+                               'export_all_courses', exported_courses_folder],
+                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    except ValueError as err:
+            logger.exception(stderr.read())
+
+def tar_exported_courses(exported_courses_folder):
+    """
+    Tar exported course folders and store them in daily_folder
+
+    Args:
+      exported_courses_folder (str): The path of folder to export courses to.
+    """
+    try:
+        for course in os.listdir(exported_courses_folder):
+            subprocess.Popen(['tar', '-zcf', course+'.tar.gz', daily_folder],
+                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    except ValueError as err:
+        logger.exception(stderr.read())
 
 
 def get_list_of_staff():
