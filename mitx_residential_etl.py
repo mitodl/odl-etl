@@ -196,7 +196,7 @@ def notify_slack_channel(slack_message):
 
 def main():
     set_environment_variables()
-    verify_and_create_daily_csv_folder(settings['Paths']['csv_folder'],
+    verify_and_create_required_folders(settings['Paths']['csv_folder'],
                                        settings['Paths']['courses'])
     export_all_courses(exported_courses_folder)
     tar_exported_courses(exported_courses_folder)
