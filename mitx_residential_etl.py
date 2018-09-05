@@ -44,7 +44,7 @@ mysql_creds_pass = settings['MySQL']['pass']
 mysql_host = settings['MySQL']['host']
 mysql_db = settings['MySQL']['db']
 course_ids = []
-exported_courses_folder = settings.['Paths']['courses'] + date_suffix + '/'
+exported_courses_folder = settings['Paths']['courses'] + date_suffix + '/'
 daily_folder = settings['Paths']['csv_folder'] + date_suffix + '/'
 
 # List of db queries
@@ -197,7 +197,7 @@ def notify_slack_channel(slack_message):
 
 def main():
     set_environment_variables()
-    verify_and_create_daily_csv_folder(settings['Paths']['csv_folder'],
+    verify_and_create_required_folders(settings['Paths']['csv_folder'],
                                        settings['Paths']['courses'])
     export_all_courses(exported_courses_folder)
     tar_exported_courses(exported_courses_folder)
