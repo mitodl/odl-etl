@@ -9,6 +9,7 @@ import json
 import os
 import subprocess
 import sys
+import tarfile
 from datetime import datetime
 
 try:
@@ -21,7 +22,7 @@ except ImportError as err:
     sys.exit("Make sure to install logbook, requests and sqlalchemy")
 
 datetime = datetime.now()
-date_suffix = datetime.strftime('%Y-%m-%d')
+date_suffix = datetime.strftime('%Y%m%d')
 
 # Read settings_file
 try:
@@ -90,13 +91,14 @@ def export_all_courses(exported_courses_folder):
 
     """
     try:
-        subprocess.Popen(['/edx/bin/python.edxapp',
-                               '/edx/app/edxapp/edx-platform/manage.py',
-                               'cms', '--settings', 'aws',
-                               'export_all_courses', exported_courses_folder],
-                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        export_courses = subprocess.Popen(['/edx/bin/python.edxapp',
+                                          '/edx/app/edxapp/edx-platform/manage.py',
+                                          'cms', '--settings', 'aws',
+                                          'export_all_courses', exported_courses_folder],
+                                          stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out, err = export_courses.communicate()
     except ValueError as err:
-            logger.exception(stderr.read())
+            logger.exception("The following error was encountered when exporting courses: ", err)
 
 def tar_exported_courses(exported_courses_folder):
     """
@@ -106,11 +108,10 @@ def tar_exported_courses(exported_courses_folder):
       exported_courses_folder (str): The path of folder to export courses to.
     """
     try:
-        for course in os.listdir(exported_courses_folder):
-            subprocess.Popen(['tar', '-zcf', course+'.tar.gz', daily_folder],
-                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    except ValueError as err:
-        logger.exception(stderr.read())
+        with tarfile.open(daily_folder + 'exported_courses_' + date_suffix + '.tar.gz', 'w:gz') as tar:
+            tar.add(exported_courses_folder, arcname=os.path.sep)
+    except tarfile.TarError as err:
+        logger.exception("The following error was encountered when compressing exported courses: ", err)
 
 
 def get_list_of_staff():
