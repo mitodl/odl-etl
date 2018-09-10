@@ -132,6 +132,17 @@ def get_course_ids():
      return course_ids
 
 
+def add_csv_header():
+    """
+    Create csv files and add header to each based on
+    fieldnames in query_dict
+    """
+    for key, value in query_dict.items():
+        with open(daily_folder + str(key) + '.csv', 'w+', encoding="utf-8") as csv_file:
+            writer = csv.DictWriter(csv_file, fieldnames=value['fieldnames'])
+            writer.writeheader()
+
+
 def mysql_query(course_ids):
     engine = create_engine('mysql+mysqlconnector://{}:{}@{}/{}'
                            .format(mysql_creds_user, mysql_creds_pass, mysql_host, mysql_db))
@@ -139,18 +150,15 @@ def mysql_query(course_ids):
     for course_id in course_ids:
         for key, value in query_dict.items():
             query_text = text(value['command'])
-            fieldnames = value['fieldnames']
             query = connection.execute(query_text, course_id=course_id.decode('utf8'))
-            write_csv(query, key, fieldnames)
+            write_csv(query, key)
 
 
-def write_csv(query, key, fieldnames):
-    with open(daily_folder + str(key) + '.csv', 'a+', encoding="utf-8") as f:
+def write_csv(query, key):
+    with open(daily_folder + str(key) + '.csv', 'a', encoding="utf-8") as f:
         writer = csv.writer(f)
-        writer.writerow(fieldnames)
         for row in query:
             writer.writerow(row)
-    f.close()
 
 
 def sync_to_s3(daily_folder, s3_bucket_name):
@@ -197,15 +205,31 @@ def notify_slack_channel(slack_message):
         logger.warn("Failed to notify slack channel with following error: {}", err)
 
 
+def run_healthcheck(url):
+    """
+    Ping healthcheck endpoint
+
+    Args:
+      url (str): healtcheck endpoint url
+    """
+    try:
+        requests.get(url)
+    except requests.exceptions.RequestException as err:
+      logger.exception("Failed to ping healthcheck with following error: ", err)
+      sys.exit(1)
+
+
 def main():
     set_environment_variables()
     verify_and_create_required_folders(settings['Paths']['csv_folder'],
                                        settings['Paths']['courses'])
     export_all_courses(exported_courses_folder)
     tar_exported_courses(exported_courses_folder)
+    add_csv_header()
     get_course_ids()
     mysql_query(course_ids)
     sync_to_s3(daily_folder, settings['S3Bucket']['bucket'])
+    run_healthcheck(settings['Healthchecks']['url'])
 
 
 if __name__ == "__main__":
