@@ -23,10 +23,11 @@ except ImportError as err:
 
 datetime = datetime.now()
 date_suffix = datetime.strftime('%Y%m%d')
+dir_path = os.path.dirname(os.path.realpath(__file__))
 
 # Read settings_file
 try:
-    settings = json.load(open('/odl-etl/mitx_etl/settings.json'))
+    settings = json.load(open(os.path.join(dir_path, './settings.json')))
 except IOError:
     sys.exit("[-] Failed to read settings file")
 
