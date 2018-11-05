@@ -26,7 +26,7 @@ date_suffix = datetime.strftime('%Y%m%d')
 
 # Read settings_file
 try:
-    settings = json.load(open('/mitx/settings.json'))
+    settings = json.load(open('/odl-etl/mitx_etl/settings.json'))
 except IOError:
     sys.exit("[-] Failed to read settings file")
 
