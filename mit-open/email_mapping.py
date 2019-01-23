@@ -16,7 +16,7 @@ RotatingFileHandler("mit_open_etl.log").push_application()
 log = Logger("mit_open_etl")
 
 try:
-    with open(os.path.join(os.path.dir(__file__), "etl_settings.yml")) as etl_settings:
+    with open(os.path.join(os.path.dirname(__file__), "etl_settings.yml")) as etl_settings:
         settings = yaml.safe_load(etl_settings)["mit-open"]
 except FileNotFoundError:
     log.error("No settings file present. Please add etl_settings.yml" " and try again.")
