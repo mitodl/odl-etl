@@ -45,7 +45,8 @@ try:
     fs = s3fs.S3FileSystem(
         key=settings["aws_access_key_id"], secret=settings["aws_secret_access_key"]
     )
-    fs.put(dest_file, f'{settings["s3_bucket"]}/user_map/{dest_file}')
+    fs.put(dest_file, '{bucket}/user_map/{dest_file}'.format(
+        bucket=settings["s3_bucket"], dest_file=dest_file))
 except ClientError:
     log.error("Unable to upload user map to S3")
     raise
