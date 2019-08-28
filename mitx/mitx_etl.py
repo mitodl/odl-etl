@@ -51,8 +51,8 @@ daily_folder = settings['Paths']['csv_folder'] + date_suffix + '/'
 # List of db queries
 query_dict = {
     'users_query': {'command': 'select auth_user.id, auth_user.username, auth_user.first_name, auth_user.last_name, auth_user.email, auth_user.is_staff, auth_user.is_active, auth_user.is_superuser, auth_user.last_login, auth_user.date_joined from auth_user inner join student_courseenrollment on student_courseenrollment.user_id = auth_user.id and student_courseenrollment.course_id = :course_id', 'fieldnames':  ['id', 'username', 'first_name', 'last_name', 'email', 'is_staff', 'is_active', 'is_superuser', 'last_login', 'date_joined']},
-    'studentmodule_query': {'command': 'select * from courseware_studentmodule where course_id= :course_id', 'fieldnames': ['id', 'module_type', 'module_id', 'student_id', 'state', 'grade', 'created', 'modified', 'max_grade', 'done', 'course_id']},
-    'enrollment_query': {'command': 'select * from student_courseenrollment where course_id= :course_id', 'fieldnames': ['id', 'user_id', 'course_id', 'created', 'is_active', 'mode']}
+    'studentmodule_query': {'command': 'select id, module_type, module_id, student_id, state, grade, created, modified, max_grade, done, course_id from courseware_studentmodule where course_id= :course_id', 'fieldnames': ['id', 'module_type', 'module_id', 'student_id', 'state', 'grade', 'created', 'modified', 'max_grade', 'done', 'course_id']},
+    'enrollment_query': {'command': 'select id, user_id, course_id, created, is_active, mode  from student_courseenrollment where course_id= :course_id', 'fieldnames': ['id', 'user_id', 'course_id', 'created', 'is_active', 'mode']}
 }
 
 
