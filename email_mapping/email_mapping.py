@@ -11,18 +11,21 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 import s3fs
+import sys
 
-RotatingFileHandler("mit_open_etl.log").push_application()
-log = Logger("mit_open_etl")
+app_name = sys.argv[1]
+
+RotatingFileHandler("{}_etl.log".format(app_name)).push_application()
+log = Logger("{}_etl".format(app_name))
 
 try:
-    with open(os.path.join(os.path.dirname(__file__), "etl_settings.yml")) as etl_settings:
-        settings = yaml.safe_load(etl_settings)["mit-open"]
+    with open(os.path.join(os.path.dirname(__file__), "{}_settings.yml".format(app_name))) as etl_settings:
+        settings = yaml.safe_load(etl_settings)[app_name]
 except FileNotFoundError:
-    log.error("No settings file present. Please add etl_settings.yml" " and try again.")
+    log.error("No settings file present. Please add {}_settings.yml and try again.".format(app_name))
     exit(1)
 
-dest_file = "user_map.parquet"
+dest_file = "{}_user_map.parquet".format(app_name)
 
 db_engine = create_engine(settings["db_url"])
 try:
