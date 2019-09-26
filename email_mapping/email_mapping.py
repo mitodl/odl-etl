@@ -20,7 +20,7 @@ log = Logger("{}_etl".format(app_name))
 
 try:
     with open(os.path.join(os.path.dirname(__file__), "{}_settings.yml".format(app_name))) as etl_settings:
-        settings = yaml.safe_load(etl_settings)[app_name]
+        settings = yaml.safe_load(etl_settings)
 except FileNotFoundError:
     log.error("No settings file present. Please add {}_settings.yml and try again.".format(app_name))
     exit(1)
