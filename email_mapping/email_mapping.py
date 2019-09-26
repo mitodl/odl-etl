@@ -37,7 +37,7 @@ except OperationalError as e:
     )
     exit(1)
 
-users_df = pd.read_sql("select username, email from auth_user", db_conn)
+users_df = pd.read_sql("select username, email from {}".format(settings['user_table']), db_conn)
 users_df["email"] = users_df["email"].apply(
     lambda x: sha256(settings["hash_salt"].encode() + x.encode()).hexdigest()
 )
