@@ -172,10 +172,10 @@ def write_csv(query, key):
 
 def get_forums_data():
     dump_forums_data = subprocess.Popen(['/usr/bin/mongodump', '--host',
-                                         'mongodb_host', '--port',
-                                         'mongodb_port', '--password',
-                                         'mongodb_pass', '--username',
-                                         'mongodb_user',
+                                         mongodb_host, '--port',
+                                         mongodb_port, '--password',
+                                         mongodb_pass, '--username',
+                                         mongodb_user,
                                          '--authenticationDatabase',
                                          'admin', '--db', forum_db,
                                          '--out', forum_data_folder],
