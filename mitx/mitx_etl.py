@@ -51,7 +51,7 @@ mongodb_password = settings['Mongodb']['password']
 forum_db = settings['Mongodb']['forum_db']
 course_ids = []
 exported_courses_folder = settings['Paths']['courses'] + date_suffix + '/'
-forum_data_folder = settings['Paths']['forum_data'] + date_suffix + '/'
+forums_data_folder = settings['Paths']['forum_data'] + date_suffix + '/'
 daily_folder = settings['Paths']['csv_folder'] + date_suffix + '/'
 
 # List of db queries
@@ -71,7 +71,7 @@ def set_environment_variables():
     os.environ['AWS_SECRET_ACCESS_KEY'] = settings['AWS']['AWS_SECRET_ACCESS_KEY']
 
 
-def verify_and_create_required_folders(csv_folder, courses):
+def verify_and_create_required_folders(csv_folder, courses, forums_data_folder):
     """
     Check whether the folder that will contain csv query files exists
 
@@ -88,6 +88,10 @@ def verify_and_create_required_folders(csv_folder, courses):
     if not os.path.exists(exported_courses_folder):
         os.makedirs(settings['Paths']['courses'] + date_suffix + '/')
         logger.info("exported_courses_folder created")
+     
+    if not os.path.exists(forums_data_folder):
+        os.makedirs(settings['Paths']['forums_data_folder'] + date_suffix + '/')
+        logger.info("forums_data_folder created")
 
 
 def export_all_courses(exported_courses_folder):
@@ -178,7 +182,7 @@ def get_forums_data():
                                          mongodb_user,
                                          '--authenticationDatabase',
                                          'admin', '--db', forum_db,
-                                         '--out', forum_data_folder],
+                                         '--out', forums_data_folder],
                                         stdout=subprocess.PIPE)
     logger.info('Forums data dumped')
 
