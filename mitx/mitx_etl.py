@@ -250,6 +250,7 @@ def main():
     add_csv_header()
     get_course_ids()
     mysql_query(course_ids)
+    get_forums_data()
     sync_to_s3(daily_folder, settings['S3Bucket']['bucket'])
     run_healthcheck(settings['Healthchecks']['url'])
 
