@@ -90,7 +90,7 @@ def verify_and_create_required_folders(csv_folder, courses, forums_data_folder):
         logger.info("exported_courses_folder created")
      
     if not os.path.exists(forums_data_folder):
-        os.makedirs(settings['Paths']['forums_data_folder'] + date_suffix + '/')
+        os.makedirs(settings['Paths']['forums_data'] + date_suffix + '/')
         logger.info("forums_data_folder created")
 
 
