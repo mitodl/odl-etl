@@ -248,7 +248,8 @@ def run_healthcheck(url):
 def main():
     set_environment_variables()
     verify_and_create_required_folders(settings['Paths']['csv_folder'],
-                                       settings['Paths']['courses'])
+                                       settings['Paths']['courses'],
+                                       settings['Paths']['forum_data'])
     export_all_courses(exported_courses_folder)
     tar_exported_courses(exported_courses_folder)
     add_csv_header()
