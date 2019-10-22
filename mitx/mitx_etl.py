@@ -44,15 +44,22 @@ mysql_creds_user = settings['MySQL']['user']
 mysql_creds_pass = settings['MySQL']['pass']
 mysql_host = settings['MySQL']['host']
 mysql_db = settings['MySQL']['db']
+mongodb_host = settings['Mongodb']['host']
+mongodb_port = settings['Mongodb']['port']
+mongodb_user = settings['Mongodb']['user']
+mongodb_password = settings['Mongodb']['password']
+forum_db = settings['Mongodb']['forum_db']
 course_ids = []
 exported_courses_folder = settings['Paths']['courses'] + date_suffix + '/'
+forum_data_folder = settings['Paths']['forum_data'] + date_suffix + '/'
 daily_folder = settings['Paths']['csv_folder'] + date_suffix + '/'
 
 # List of db queries
 query_dict = {
     'users_query': {'command': 'select auth_user.id, auth_user.username, auth_user.first_name, auth_user.last_name, auth_user.email, auth_user.is_staff, auth_user.is_active, auth_user.is_superuser, auth_user.last_login, auth_user.date_joined from auth_user inner join student_courseenrollment on student_courseenrollment.user_id = auth_user.id and student_courseenrollment.course_id = :course_id', 'fieldnames':  ['id', 'username', 'first_name', 'last_name', 'email', 'is_staff', 'is_active', 'is_superuser', 'last_login', 'date_joined']},
     'studentmodule_query': {'command': 'select id, module_type, module_id, student_id, state, grade, created, modified, max_grade, done, course_id from courseware_studentmodule where course_id= :course_id', 'fieldnames': ['id', 'module_type', 'module_id', 'student_id', 'state', 'grade', 'created', 'modified', 'max_grade', 'done', 'course_id']},
-    'enrollment_query': {'command': 'select id, user_id, course_id, created, is_active, mode  from student_courseenrollment where course_id= :course_id', 'fieldnames': ['id', 'user_id', 'course_id', 'created', 'is_active', 'mode']}
+    'enrollment_query': {'command': 'select id, user_id, course_id, created, is_active, mode  from student_courseenrollment where course_id= :course_id', 'fieldnames': ['id', 'user_id', 'course_id', 'created', 'is_active', 'mode']},
+    'role_query': {'command': 'select id,user_id,org,course_id,role from student_courseaccessrole where course_id= :course_id', 'fieldnames': ['id', 'user_id', 'org', 'course_id', 'role']}
 }
 
 
@@ -93,13 +100,14 @@ def export_all_courses(exported_courses_folder):
     """
     try:
         export_courses = subprocess.Popen(['/edx/bin/python.edxapp',
-                                          '/edx/app/edxapp/edx-platform/manage.py',
-                                          'cms', '--settings', 'aws',
-                                          'export_all_courses', exported_courses_folder],
+                                           '/edx/app/edxapp/edx-platform/manage.py',
+                                           'cms', '--settings', 'aws',
+                                           'export_all_courses', exported_courses_folder],
                                           stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out, err = export_courses.communicate()
     except ValueError as err:
             logger.exception("The following error was encountered when exporting courses: ", err)
+
 
 def tar_exported_courses(exported_courses_folder):
     """
@@ -120,17 +128,17 @@ def get_list_of_staff():
 
 
 def get_course_ids():
-     """
-     Get a list of course ids that is necessary for the rest of the
-     functions to work.
-     """
-     global course_ids
-     dump_course_ids = subprocess.Popen(['/edx/bin/python.edxapp',
-                                         '/edx/app/edxapp/edx-platform/manage.py',
-                                         'lms', '--settings', 'aws',
-                                         'dump_course_ids'], stdout=subprocess.PIPE)
-     course_ids = dump_course_ids.communicate()[0].split()
-     return course_ids
+    """
+    Get a list of course ids that is necessary for the rest of the
+    functions to work.
+    """
+    global course_ids
+    dump_course_ids = subprocess.Popen(['/edx/bin/python.edxapp',
+                                        '/edx/app/edxapp/edx-platform/manage.py',
+                                        'lms', '--settings', 'aws',
+                                        'dump_course_ids'], stdout=subprocess.PIPE)
+    course_ids = dump_course_ids.communicate()[0].split()
+    return course_ids
 
 
 def add_csv_header():
@@ -160,6 +168,19 @@ def write_csv(query, key):
         writer = csv.writer(f)
         for row in query:
             writer.writerow(row)
+
+
+def get_forums_data():
+    dump_forums_data = subprocess.Popen(['/usr/bin/mongodump', '--host',
+                                         'mongodb_host', '--port',
+                                         'mongodb_port', '--password',
+                                         'mongodb_pass', '--username',
+                                         'mongodb_user',
+                                         '--authenticationDatabase',
+                                         'admin', '--db', forum_db,
+                                         '--out', forum_data_folder],
+                                        stdout=subprocess.PIPE)
+    logger.info('Forums data dumped')
 
 
 def sync_to_s3(daily_folder, s3_bucket_name):
@@ -216,8 +237,8 @@ def run_healthcheck(url):
     try:
         requests.get(url)
     except requests.exceptions.RequestException as err:
-      logger.exception("Failed to ping healthcheck with following error: ", err)
-      sys.exit(1)
+        logger.exception("Failed to ping healthcheck with following error: ", err)
+        sys.exit(1)
 
 
 def main():
