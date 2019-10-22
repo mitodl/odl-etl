@@ -82,15 +82,15 @@ def verify_and_create_required_folders(csv_folder, courses, forums_data_folder):
       If folder exists return None, and if not, logs error and exit.
     """
     if not os.path.exists(daily_folder):
-        os.makedirs(settings['Paths']['csv_folder'] + date_suffix + '/')
+        os.makedirs(daily_folder)
         logger.info("csv folder(s) created")
 
     if not os.path.exists(exported_courses_folder):
-        os.makedirs(settings['Paths']['courses'] + date_suffix + '/')
+        os.makedirs(exported_courses_folder)
         logger.info("exported_courses_folder created")
      
     if not os.path.exists(forums_data_folder):
-        os.makedirs(settings['Paths']['forums_data_folder'] + date_suffix + '/')
+        os.makedirs(forums_data_folder)
         logger.info("forums_data_folder created")
 
     if not os.path.exists(forums_data_folder):
@@ -178,11 +178,12 @@ def write_csv(query, key):
             writer.writerow(row)
 
 
-def get_forums_data():
+def get_forums_data(mongodb_host, mongodb_port, mongodb_password, mongodb_user,
+                    forum_db, forums_data_folder):
     dump_forums_data = subprocess.Popen(['/usr/bin/mongodump', '--host',
                                          mongodb_host, '--port',
                                          mongodb_port, '--password',
-                                         mongodb_pass, '--username',
+                                         mongodb_password, '--username',
                                          mongodb_user,
                                          '--authenticationDatabase',
                                          'admin', '--db', forum_db,
@@ -252,13 +253,15 @@ def run_healthcheck(url):
 def main():
     set_environment_variables()
     verify_and_create_required_folders(settings['Paths']['csv_folder'],
-                                       settings['Paths']['courses'])
+                                       settings['Paths']['courses'],
+                                       settings['Paths']['forum_data'])
     export_all_courses(exported_courses_folder)
     tar_exported_courses(exported_courses_folder)
     add_csv_header()
     get_course_ids()
     mysql_query(course_ids)
-    get_forums_data()
+    get_forums_data(mongodb_host, mongodb_port, mongodb_password, mongodb_user,
+                   forum_db, forums_data_folder)
     sync_to_s3(daily_folder, settings['S3Bucket']['bucket'])
     run_healthcheck(settings['Healthchecks']['url'])
 
