@@ -254,10 +254,10 @@ def main():
     export_all_courses(exported_courses_folder)
     tar_exported_courses(exported_courses_folder)
     add_csv_header()
-    get_course_ids(mongodb_host, mongodb_port, mongodb_password, mongodb_user,
-                   forum_db, forums_data_folder)
+    get_course_ids()
     mysql_query(course_ids)
-    get_forums_data()
+    get_forums_data(mongodb_host, mongodb_port, mongodb_password, mongodb_user,
+                   forum_db, forums_data_folder)
     sync_to_s3(daily_folder, settings['S3Bucket']['bucket'])
     run_healthcheck(settings['Healthchecks']['url'])
 
