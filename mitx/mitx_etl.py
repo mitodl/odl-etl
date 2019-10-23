@@ -192,7 +192,7 @@ def get_forums_data(mongodb_host, mongodb_port, mongodb_password, mongodb_user,
     logger.info('Forums data dumped')
 
 
-def sync_to_s3(daily_folder, s3_bucket_name):
+def sync_to_s3(daily_folder, forums_data_folder, s3_bucket_name):
     """
     Sync local files to specified S3 bucket
 
@@ -200,19 +200,20 @@ def sync_to_s3(daily_folder, s3_bucket_name):
       daily_folder (str): folder containing msql query results.
       s3_bucket_name (str): s3 bucket name
     """
-    try:
-        cmd_output = subprocess.run(["aws", "s3", "sync", daily_folder,
-                                    "s3://" + s3_bucket_name + '/' + date_suffix],
-                                    check=True, stdout=subprocess.PIPE,
-                                    stderr=subprocess.PIPE)
-    except SyntaxError as err:
-        logger.exception("Failed to run sync command. Check if awscli is installed")
-        notify_slack_channel("Failed to run sync command: `{}`".format(err))
-        sys.exit("[-] Failed to run sync command. Check if awscli is installed")
-    except subprocess.SubprocessError as err:
-        logger.exception("Failed to sync local files to s3 bucket")
-        notify_slack_channel("Sync failed: `{}`".format(err))
-        sys.exit("[-] Failed to sync daily_folder to s3 bucket")
+    for folder in [daily_folder, forums_data_folder]:
+        try:
+            cmd_output = subprocess.run(["aws", "s3", "sync", folder,
+                                        "s3://" + s3_bucket_name + '/' + date_suffix],
+                                        check=True, stdout=subprocess.PIPE,
+                                        stderr=subprocess.PIPE)
+        except SyntaxError as err:
+            logger.exception("Failed to run sync command. Check if awscli is installed")
+            notify_slack_channel("Failed to run sync command: `{}`".format(err))
+            sys.exit("[-] Failed to run sync command. Check if awscli is installed")
+        except subprocess.SubprocessError as err:
+            logger.exception("Failed to sync local files to s3 bucket")
+            notify_slack_channel("Sync failed: `{}`".format(err))
+            sys.exit("[-] Failed to sync daily_folder to s3 bucket")
     logger.info("S3 sync successfully ran: {}", cmd_output)
     notify_slack_channel("Sync succeeded: `str({}`)".format(cmd_output))
     logger.info("Syncing complete")
@@ -262,7 +263,7 @@ def main():
     mysql_query(course_ids)
     get_forums_data(mongodb_host, mongodb_port, mongodb_password, mongodb_user,
                    forum_db, forums_data_folder)
-    sync_to_s3(daily_folder, settings['S3Bucket']['bucket'])
+    sync_to_s3(daily_folder, forums_data_folder, settings['S3Bucket']['bucket'])
     run_healthcheck(settings['Healthchecks']['url'])
 
 
