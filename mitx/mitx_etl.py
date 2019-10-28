@@ -115,9 +115,9 @@ def export_all_courses(exported_courses_folder):
                 ['/edx/bin/python.edxapp',
                  '/edx/app/edxapp/edx-platform/manage.py',
                  'cms', '--settings', 'production',
-                 'export_olx', course_id, '--output',
+                 'export_olx', course_id.encode('utf8'), '--output',
                  '{0}/{1}.tar.gz'.format(exported_courses_folder,
-                                         course_id)],
+                                         course_id.encode('utf8'))],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             out, err = export_course.communicate()
     except ValueError as err:
