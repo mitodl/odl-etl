@@ -161,7 +161,7 @@ def get_course_ids():
     global course_ids
     dump_course_ids = subprocess.Popen(['/edx/bin/python.edxapp',
                                         '/edx/app/edxapp/edx-platform/manage.py',
-                                        'lms', '--settings', 'aws',
+                                        'lms', '--settings', 'production',
                                         'dump_course_ids'], stdout=subprocess.PIPE)
     course_ids = dump_course_ids.communicate()[0].split()
     return course_ids
