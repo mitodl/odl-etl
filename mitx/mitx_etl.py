@@ -114,17 +114,21 @@ def export_all_courses(exported_courses_folder):
              'dump_course_ids'],
             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out, err = course_list.communicate()
-        for course_id in out.splitlines():
-            course_id = course_id.decode('utf-8')
-            export_course = subprocess.Popen(
-                ['/edx/bin/python.edxapp',
-                 '/edx/app/edxapp/edx-platform/manage.py',
-                 'cms', '--settings', 'production',
-                 'export_olx', course_id, '--output',
-                 '{0}/{1}.tar.gz'.format(exported_courses_folder,
-                                         course_id)],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            out, err = export_course.communicate()
+        if out:
+            for course_id in out.splitlines():
+                course_id = course_id.decode('utf-8')
+                export_course = subprocess.Popen(
+                    ['/edx/bin/python.edxapp',
+                     '/edx/app/edxapp/edx-platform/manage.py',
+                     'cms', '--settings', 'production',
+                     'export_olx', course_id, '--output',
+                     '{0}/{1}.tar.gz'.format(exported_courses_folder,
+                                             course_id)],
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                out, err = export_course.communicate()
+        else:
+            logger.exception("Failed to dump_course_ids")
+            sys.exit(1)
     except ValueError as err:
             logger.exception(
                 "The following error was encountered when exporting courses: ",
