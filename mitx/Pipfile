@@ -8,6 +8,7 @@ name = "pypi"
 [packages]
 
 awscli = "*"
+envbash = '*'
 Logbook = "*"
 mysql-connector-python = "*"
 requests = "*"

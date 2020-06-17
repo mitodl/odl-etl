@@ -14,6 +14,7 @@ from datetime import datetime
 
 try:
     import requests
+    from envbash import load_envbash
     from logbook import Logger, RotatingFileHandler
     from sqlalchemy import create_engine
     from sqlalchemy.sql import text
@@ -25,9 +26,10 @@ datetime = datetime.now()
 date_suffix = datetime.strftime('%Y%m%d')
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
-# Read settings_file
+# Read settings_file and load env
 try:
     settings = json.load(open(os.path.join(dir_path, './settings.json')))
+    load_envbash = ('/edx/app/edxapp/edxapp_env')
 except IOError:
     sys.exit("[-] Failed to read settings file")
 
