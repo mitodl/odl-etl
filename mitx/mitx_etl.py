@@ -29,7 +29,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 # Read settings_file and load env
 try:
     settings = json.load(open(os.path.join(dir_path, './settings.json')))
-    load_envbash = ('/edx/app/edxapp/edxapp_env')
+    load_envbash('/odl-etl/mitx/env.bash')
 except IOError:
     sys.exit("[-] Failed to read settings file")
 
