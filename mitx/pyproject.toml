@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "odl_etl.mit"
+version = "0.1.0"
+description = "Daily extracts for edX course data"
+authors = ["Sar Haidar <shaidar@mit.edu>", "Tobias Macey <tmacey@mit.edu>"]
+license = "BSD-3-Clause"
+
+[tool.poetry.dependencies]
+python = "^3.5"
+awscli = "^1.18.153"
+logbook = "^1.5.3"
+requests = "^2.24.0"
+
+[tool.poetry.dev-dependencies]
+wemake-python-styleguide = "*"
+pyformat = "^0.7"
+isort = "<5"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
