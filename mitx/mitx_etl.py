@@ -10,7 +10,7 @@ import tarfile
 from datetime import datetime
 
 import requests
-    from envbash import load_envbash
+from envbash import load_envbash
 from logbook import Logger, RotatingFileHandler
 
 datetime = datetime.now()
@@ -63,10 +63,6 @@ def verify_and_create_required_folders(courses):
         os.makedirs(exported_courses_folder)
         logger.info('exported_courses_folder created')
 
-    if not os.path.exists(forums_data_folder):
-        os.makedirs(settings['Paths']['forums_data_folder'] + date_suffix + '/')
-        logger.info("forums_data_folder created")
-
 
 def export_all_courses(exported_courses_folder):
     """Export all courses into specified folder.
@@ -90,28 +86,24 @@ def export_all_courses(exported_courses_folder):
             for course_id in out.splitlines():
                 course_id = course_id.decode('utf-8')
                 export_course = subprocess.Popen(
-                [
-                    '/edx/bin/python.edxapp',
-                    '/edx/app/edxapp/edx-platform/manage.py',
-                    'cms',
-                    '--settings',
-                    'production',
-                    'export_olx', course_id.encode('utf8'), '--output',
-                    '{0}/{1}.tar.gz'.format(
-                        exported_courses_folder,
-                        course_id.encode('utf8'),
-                    ),
-                ],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-            )
+                    [
+                        '/edx/bin/python.edxapp',
+                        '/edx/app/edxapp/edx-platform/manage.py',
+                        'cms',
+                        '--settings',
+                        'production',
+                        'export_olx', course_id.encode('utf8'), '--output',
+                        '{0}/{1}.tar.gz'.format(
+                            exported_courses_folder,
+                            course_id.encode('utf8'),
+                        ),
+                    ],
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                )
                 out, err = export_course.communicate()
-    except ValueError as error:
-            logger.exception("Failed to dump_course_ids")
-            sys.exit(1)
-        logger.exception(
-            'The following error was encountered when exporting courses: ',
-            error,
-        )
+    except ValueError:
+        logger.exception("Failed to dump_course_ids")
+        sys.exit(1)
 
 
 def tar_exported_courses(exported_courses_folder):
@@ -204,9 +196,7 @@ def run_healthcheck(url):
 def main():
     set_environment_variables()
     verify_and_create_required_folders(
-        settings['Paths']['csv_folder'],
         settings['Paths']['courses'],
-        settings['Paths']['forum_data'],
     )
     export_all_courses(exported_courses_folder)
     tar_exported_courses(exported_courses_folder)
