@@ -73,7 +73,7 @@ def export_all_courses(exported_courses_folder):
     try:
         course_list = subprocess.Popen(
             [
-                '/edx/bin/python.edxapp',
+                '/edx/app/edxapp/venvs/edxapp/bin/python',
                 '/edx/app/edxapp/edx-platform/manage.py',
                 'cms',
                 '--settings',
@@ -84,18 +84,17 @@ def export_all_courses(exported_courses_folder):
         out, err = course_list.communicate()
         if out:
             for course_id in out.splitlines():
-                course_id = course_id.decode('utf-8')
                 export_course = subprocess.Popen(
                     [
-                        '/edx/bin/python.edxapp',
+                        '/edx/app/edxapp/venvs/edxapp/bin/python',
                         '/edx/app/edxapp/edx-platform/manage.py',
                         'cms',
                         '--settings',
                         'production',
-                        'export_olx', course_id.encode('utf8'), '--output',
+                        'export_olx', course_id, '--output',
                         '{0}/{1}.tar.gz'.format(
                             exported_courses_folder,
-                            course_id.encode('utf8'),
+                            course_id,
                         ),
                     ],
                     stdout=subprocess.PIPE, stderr=subprocess.PIPE,
